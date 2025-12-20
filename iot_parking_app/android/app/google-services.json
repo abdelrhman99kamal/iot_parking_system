@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "550530190588",
+    "firebase_url": "https://iot-parking-app-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "iot-parking-app",
+    "storage_bucket": "iot-parking-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:550530190588:android:ec0dc00408782664e51b79",
+        "android_client_info": {
+          "package_name": "com.example.parking_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCUyqXV-nxWO-KXLHrsdGhW-gl5GVMk04E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
