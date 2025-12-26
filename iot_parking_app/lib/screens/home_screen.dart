@@ -1,38 +1,68 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:parking_app/components/custom_slot_card.dart';
+import 'package:parking_app/screens/login_screen.dart';
 
 // XOR Key
 const int xorKey = 123;
 
-// دالة فك التشفير
-int unprotect(int value) => value ^ xorKey;
+int decryption(int value) => value ^ xorKey;
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+  static const String id = '/home';
 
   @override
-  State<Home> createState() => _HomeState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeScreenState extends State<HomeScreen> {
   final _dbRef = FirebaseDatabase.instance.ref().child('parking_slots');
-
+  final String? userName = FirebaseAuth.instance.currentUser?.displayName;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF18181B),
       appBar: AppBar(
         backgroundColor: const Color(0xFF18181B),
-        title: const Text(
-          'IOT Parking App',
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 28,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Image.asset('assets/images/logo.png', width: 50),
+            const Text(
+              'IOT Parking App',
+              style: TextStyle(
+                color: Color(0xFF25BAC1),
+                fontWeight: FontWeight.bold,
+                fontSize: 28,
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white54),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              Navigator.of(context).pushReplacementNamed(LoginScreen.id);
+            },
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(40),
+          child: Row(
+            children: [
+              const SizedBox(width: 16),
+              Text(
+                'Hi, ${userName ?? 'Sir'} ✨',
+
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ],
+          ),
+        ),
       ),
       body: StreamBuilder(
         stream: _dbRef.onValue,
@@ -71,7 +101,7 @@ class _HomeState extends State<Home> {
                 encryptedVal = 0;
               }
 
-              bool isAvailable = (unprotect(encryptedVal) == 1);
+              bool isAvailable = (decryption(encryptedVal) == 1);
               slotsStatus[id] = isAvailable;
 
               if (isAvailable) {
@@ -86,8 +116,8 @@ class _HomeState extends State<Home> {
 
           return Column(
             children: [
+              const SizedBox(height: 50),
               Container(
-                height: 60,
                 color: const Color(0xFF18181B),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
