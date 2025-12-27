@@ -8,7 +8,8 @@ class CustomTextField extends StatelessWidget {
     required this.label,
     this.isPassword = false,
     this.validator,
-    this.controller, this.isLoginTheme = false,
+    this.controller,
+    this.isLoginTheme = false,
   });
 
   final String label;
@@ -40,7 +41,7 @@ class CustomTextField extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
           child: TextFormField(
             keyboardType: TextInputType.emailAddress,
-            
+
             decoration: InputDecoration(
               filled: true,
               fillColor: const Color(0xFF27272A),
@@ -51,11 +52,11 @@ class CustomTextField extends StatelessWidget {
 
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.0),
-                borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                borderSide: const BorderSide(color: Colors.red, width: 1),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.0),
-                borderSide: const BorderSide(color: Colors.red, width: 1.5),
+                borderSide: const BorderSide(color: Colors.red, width: 2),
               ),
 
               enabledBorder: OutlineInputBorder(
@@ -68,7 +69,9 @@ class CustomTextField extends StatelessWidget {
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16.0),
                 borderSide: BorderSide(
-                  color: (isLoginTheme!) ? Color(0xFF25BAC1) : Color(0xFF00A63E),
+                  color: (isLoginTheme!)
+                      ? Color(0xFF25BAC1)
+                      : Color(0xFF00A63E),
                 ),
               ),
             ),

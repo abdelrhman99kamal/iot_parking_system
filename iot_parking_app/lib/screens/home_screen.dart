@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:parking_app/components/custom_slot_card.dart';
 import 'package:parking_app/screens/login_screen.dart';
+import 'package:parking_app/services/auth_service.dart';
 
 // XOR Key
 const int xorKey = 123;
@@ -45,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.white54),
             onPressed: () async {
-              await FirebaseAuth.instance.signOut();
+              await AuthService.signOut();
               Navigator.of(context).pushReplacementNamed(LoginScreen.id);
             },
           ),
@@ -122,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
+                    // Available and Occupied count
                     Row(
                       children: [
                         const Icon(Icons.square_rounded, color: Colors.green),
@@ -157,85 +159,83 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Center(
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // upper part
-                          Row(
-                            children: [
-                              const Spacer(flex: 3),
-                              CustomSlotCard(
-                                slotId: "P-05",
-                                isVertical: false,
-                                isAvailable: getStatus("P-05"),
-                              ),
-                              const Spacer(flex: 1),
-                              CustomSlotCard(
-                                slotId: "P-04",
-                                isVertical: false,
-                                isAvailable: getStatus("P-04"),
-                              ),
-                              const Spacer(flex: 3),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // upper part
+                        Row(
+                          children: [
+                            const Spacer(flex: 3),
+                            CustomSlotCard(
+                              slotId: "P-05",
+                              isVertical: false,
+                              isAvailable: getStatus("P-05"),
+                            ),
+                            const Spacer(flex: 1),
+                            CustomSlotCard(
+                              slotId: "P-04",
+                              isVertical: false,
+                              isAvailable: getStatus("P-04"),
+                            ),
+                            const Spacer(flex: 3),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
 
-                          // lower part
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              Column(
-                                children: [
-                                  CustomSlotCard(
-                                    slotId: "P-06",
-                                    isVertical: true,
-                                    isAvailable: getStatus("P-06"),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  CustomSlotCard(
-                                    slotId: "P-07",
-                                    isVertical: true,
-                                    isAvailable: getStatus("P-07"),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  CustomSlotCard(
-                                    slotId: "P-08",
-                                    isVertical: true,
-                                    isAvailable: getStatus("P-08"),
-                                  ),
-                                ],
-                              ),
-                              Image.asset(
-                                'assets/images/image.png',
-                                fit: BoxFit.contain,
-                                height: 398,
-                              ),
-                              Column(
-                                children: [
-                                  CustomSlotCard(
-                                    slotId: "P-03",
-                                    isVertical: true,
-                                    isAvailable: getStatus("P-03"),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  CustomSlotCard(
-                                    slotId: "P-02",
-                                    isVertical: true,
-                                    isAvailable: getStatus("P-02"),
-                                  ),
-                                  const SizedBox(height: 20),
-                                  CustomSlotCard(
-                                    slotId: "P-01",
-                                    isVertical: true,
-                                    isAvailable: getStatus("P-01"),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+                        // lower part
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Column(
+                              children: [
+                                CustomSlotCard(
+                                  slotId: "P-06",
+                                  isVertical: true,
+                                  isAvailable: getStatus("P-06"),
+                                ),
+                                const SizedBox(height: 20),
+                                CustomSlotCard(
+                                  slotId: "P-07",
+                                  isVertical: true,
+                                  isAvailable: getStatus("P-07"),
+                                ),
+                                const SizedBox(height: 20),
+                                CustomSlotCard(
+                                  slotId: "P-08",
+                                  isVertical: true,
+                                  isAvailable: getStatus("P-08"),
+                                ),
+                              ],
+                            ),
+                            Image.asset(
+                              'assets/images/image.png',
+                              fit: BoxFit.contain,
+                              height: 398,
+                            ),
+                            Column(
+                              children: [
+                                CustomSlotCard(
+                                  slotId: "P-03",
+                                  isVertical: true,
+                                  isAvailable: getStatus("P-03"),
+                                ),
+                                const SizedBox(height: 20),
+                                CustomSlotCard(
+                                  slotId: "P-02",
+                                  isVertical: true,
+                                  isAvailable: getStatus("P-02"),
+                                ),
+                                const SizedBox(height: 20),
+                                CustomSlotCard(
+                                  slotId: "P-01",
+                                  isVertical: true,
+                                  isAvailable: getStatus("P-01"),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                 ),
