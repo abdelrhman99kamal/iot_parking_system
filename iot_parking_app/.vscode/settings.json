@@ -1,3 +1,4 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "cmake.sourceDirectory": "F:/IT Fourth Year/First Semster/IOT/project/iot_parking_app/linux"
 }

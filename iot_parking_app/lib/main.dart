@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:parking_app/firebase_options.dart';
 import 'package:parking_app/screens/home_screen.dart';
@@ -10,6 +11,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  FirebaseDatabase.instance.databaseURL == null
+      ? FirebaseDatabase.instanceFor(
+          app: Firebase.app(),
+          databaseURL:
+              'https://iot-parking-app-default-rtdb.europe-west1.firebasedatabase.app',
+        )
+      : FirebaseDatabase.instance;
   runApp(const MyApp());
 }
 

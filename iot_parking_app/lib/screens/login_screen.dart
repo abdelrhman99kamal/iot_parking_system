@@ -83,7 +83,10 @@ class LoginScreen extends StatelessWidget {
                       Spacer(),
                       TextButton(
                         onPressed: () async {
-                          if (_emailController.text.trim().isEmpty) {
+                          final email = _emailController.text.trim();
+
+                          // 1. Check empty email
+                          if (email.isEmpty) {
                             AwesomeDialog(
                               context: context,
                               dialogType: DialogType.warning,
@@ -94,11 +97,13 @@ class LoginScreen extends StatelessWidget {
                             return;
                           }
 
-                          try {
-                            await FirebaseAuth.instance.sendPasswordResetEmail(
-                              email: _emailController.text.trim(),
-                            );
+                          // 2. Send reset email
+                          final error = await AuthService.resetPassword(email);
 
+                          if (!context.mounted)
+                            return; // ✅ Safety check after async
+
+                          if (error == null) {
                             AwesomeDialog(
                               context: context,
                               dialogType: DialogType.success,
@@ -107,14 +112,14 @@ class LoginScreen extends StatelessWidget {
                               desc:
                                   'A password reset link has been sent to your email.',
                             ).show();
-                          } catch (e) {
+                          } else {
                             AwesomeDialog(
                               context: context,
                               dialogType: DialogType.error,
                               animType: AnimType.rightSlide,
                               title: 'Error',
                               desc:
-                                  'Please make sure the email you entered is correct!',
+                                  error, // ✅ Shows specific error from AuthService
                             ).show();
                           }
                         },
@@ -244,25 +249,25 @@ class LoginScreen extends StatelessWidget {
                         final userCredential =
                             await AuthService.signInWithGoogle();
 
+                        if (!context.mounted) return; // ✅ أضف السطر ده
+
                         if (userCredential != null &&
                             userCredential.user != null) {
-                          print("Signed in as: ${userCredential.user!.email}");
-
-                          // Navigate to the next page
                           Navigator.pushReplacementNamed(
                             context,
                             HomeScreen.id,
                           );
                         }
                       } catch (e) {
-                        if (context.mounted) {
-                          AwesomeDialog(
-                            context: context,
-                            title: "Error",
-                            desc: e.toString(),
-                          ).show();
-                        }
-                        print("Login failed: $e");
+                        if (!context.mounted) return; // ✅ وده كمان
+
+                        AwesomeDialog(
+                          context: context,
+                          dialogType: DialogType.error,
+                          animType: AnimType.rightSlide,
+                          title: "Error",
+                          desc: e.toString(),
+                        ).show();
                       }
                     },
                     child: Container(

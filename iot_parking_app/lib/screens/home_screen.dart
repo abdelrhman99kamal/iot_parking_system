@@ -47,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout, color: Colors.white54),
             onPressed: () async {
               await AuthService.signOut();
+              if (!context.mounted) return; // ✅
               Navigator.of(context).pushReplacementNamed(LoginScreen.id);
             },
           ),
