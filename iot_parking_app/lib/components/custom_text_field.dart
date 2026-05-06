@@ -40,8 +40,6 @@ class CustomTextField extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
           child: TextFormField(
-            keyboardType: TextInputType.emailAddress,
-
             decoration: InputDecoration(
               filled: true,
               fillColor: const Color(0xFF27272A),
