@@ -13,7 +13,7 @@ class AuthService {
     if (!_initialized) {
       await _googleSignIn.initialize(
         serverClientId:
-            "550530190588-6vdgd9u9a2ttsjd0mnjh2nhbjdl5ui2k.apps.googleusercontent.com",
+            "PUT_YOUR_WEB_CLIENT_ID_HER",
       );
       _initialized = true;
     }
@@ -25,12 +25,9 @@ class AuthService {
       await initGoogle();
 
       final GoogleSignInAccount googleUser = await _googleSignIn.authenticate();
-
       final idToken = googleUser.authentication.idToken;
-
       final authorization = await googleUser.authorizationClient
           .authorizationForScopes(['email', 'profile']);
-
       final accessToken = authorization?.accessToken;
 
       if (accessToken == null || idToken == null) {
@@ -45,7 +42,6 @@ class AuthService {
       final userCredential = await _auth.signInWithCredential(credential);
       final User? user = userCredential.user;
 
-      // Save new user to Firestore
       if (user != null) {
         final userDoc = FirebaseFirestore.instance
             .collection('users')
@@ -65,7 +61,12 @@ class AuthService {
 
       return userCredential;
     } catch (e) {
-      rethrow;
+      // ✅ User pressed back - not a real error, just return null silently
+      if (e is GoogleSignInException &&
+          e.code == GoogleSignInExceptionCode.canceled) {
+        return null;
+      }
+      rethrow; // only rethrow real errors
     }
   }
 
@@ -94,6 +95,32 @@ class AuthService {
     } catch (e) {
       print(e.toString());
       return null;
+    }
+  }
+
+  // ✅ Reset Password (Forgot Password)
+  static Future<String?> resetPassword(String email) async {
+    try {
+      // Check if email field is empty
+      if (email.trim().isEmpty) {
+        return 'Please enter your email address';
+      }
+
+      await _auth.sendPasswordResetEmail(email: email.trim());
+      return null; // null = success, no error
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case 'user-not-found':
+          return 'No account found with this email';
+        case 'invalid-email':
+          return 'Invalid email address format';
+        case 'too-many-requests':
+          return 'Too many attempts. Please try again later';
+        default:
+          return e.message ?? 'Something went wrong. Please try again';
+      }
+    } catch (e) {
+      return 'Something went wrong. Please try again';
     }
   }
 
