@@ -10,8 +10,8 @@
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 // ================= WiFi =================
-#define WIFI_SSID     "BMWM3"
-#define WIFI_PASSWORD "@BMWM3@@##"
+#define WIFI_SSID     "IOT"
+#define WIFI_PASSWORD "20032003"
 
 // ================= Firebase =================
 #define API_KEY      "AIzaSyCUyqXV-nxWO-KXLHrsdGhW-gl5GVMk04E"
@@ -25,12 +25,17 @@ bool signupOK = false;
 // ================= SERVO SETTINGS =================
 #define SERVO_FREQ 50
 #define SERVO_RES  16
-#define SERVO_CLOSE 1638   // 90 درجة
-#define SERVO_OPEN  4915   // 90 درجة
+#define SERVO_CLOSE 1638
+#define SERVO_OPEN  4915
 
 // ================= Servo Pins =================
 #define SERVO_IN   18
 #define SERVO_OUT  19
+
+// ================= LED Pins =================
+#define RED_LED     4
+#define YELLOW_LED  2
+#define GREEN_LED   15
 
 // ================= Parking Sensors =================
 #define IR1 32
@@ -61,19 +66,52 @@ bool lastGateOutState = HIGH;
 int protect(int value) { return value ^ XOR_KEY; }
 
 void setup() {
+
   Serial.begin(115200);
   delay(1000);
   Serial.println("BOOT OK");
 
+  // ================= LEDs =================
+  pinMode(RED_LED, OUTPUT);
+  pinMode(YELLOW_LED, OUTPUT);
+  pinMode(GREEN_LED, OUTPUT);
+
+  // بداية التشغيل = أصفر
+  digitalWrite(RED_LED, LOW);
+  digitalWrite(YELLOW_LED, HIGH);
+  digitalWrite(GREEN_LED, LOW);
+
   // ================= WiFi =================
   WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
   Serial.print("Connecting WiFi");
-  while (WiFi.status() != WL_CONNECTED) {
+
+  int timeout = 0;
+
+  while (WiFi.status() != WL_CONNECTED && timeout < 20) {
     Serial.print(".");
-    delay(300);
+    delay(500);
+    timeout++;
   }
-  Serial.println("\nWiFi Connected");
-  Serial.println(WiFi.localIP());
+
+  if (WiFi.status() == WL_CONNECTED) {
+
+    Serial.println("\nWiFi Connected");
+    Serial.println(WiFi.localIP());
+
+    // WiFi Connected = أخضر
+    digitalWrite(RED_LED, LOW);
+    digitalWrite(YELLOW_LED, LOW);
+    digitalWrite(GREEN_LED, HIGH);
+
+  } else {
+
+    Serial.println("\nWiFi Failed -> Running Offline Mode");
+
+    // WiFi Failed = أحمر
+    digitalWrite(RED_LED, HIGH);
+    digitalWrite(YELLOW_LED, LOW);
+    digitalWrite(GREEN_LED, LOW);
+  }
 
   // ================= Firebase =================
   config.api_key = API_KEY;
@@ -95,7 +133,7 @@ void setup() {
   // ================= Parking Sensors =================
   for (int i = 0; i < 8; i++) {
     pinMode(irPins[i], INPUT_PULLUP);
-    lastSlotState[i] = digitalRead(irPins[i]); // قراءة أولية
+    lastSlotState[i] = digitalRead(irPins[i]);
   }
 
   // ================= Gate Sensors =================
@@ -112,6 +150,7 @@ void setup() {
   // ================= Servo PWM =================
   ledcAttach(SERVO_IN,  SERVO_FREQ, SERVO_RES);
   ledcAttach(SERVO_OUT, SERVO_FREQ, SERVO_RES);
+
   ledcWrite(SERVO_IN, SERVO_CLOSE);
   ledcWrite(SERVO_OUT, SERVO_CLOSE);
 
@@ -120,15 +159,33 @@ void setup() {
 
 void loop() {
 
+  // ================= WiFi Status LEDs =================
+  if (WiFi.status() == WL_CONNECTED) {
+
+    digitalWrite(RED_LED, LOW);
+    digitalWrite(YELLOW_LED, LOW);
+    digitalWrite(GREEN_LED, HIGH);
+
+  } else {
+
+    digitalWrite(RED_LED, HIGH);
+    digitalWrite(YELLOW_LED, LOW);
+    digitalWrite(GREEN_LED, LOW);
+  }
+
   // ================= Count Free Slots =================
   freeSlots = 0;
+
   for (int i = 0; i < 8; i++) {
-    if (digitalRead(irPins[i]) == HIGH) freeSlots++;
+    if (digitalRead(irPins[i]) == HIGH)
+      freeSlots++;
   }
+
   occupiedSlots = 8 - freeSlots;
 
   // ================= Firebase Update (Slots ONLY) =================
   if (Firebase.ready() && signupOK) {
+
     for (int i = 0; i < 8; i++) {
 
       bool currentState = digitalRead(irPins[i]);
@@ -136,39 +193,50 @@ void loop() {
       if (currentState != lastSlotState[i]) {
 
         bool isAvailable = (currentState == HIGH);
+
         String path = "/parking_slots/slot_0" + String(i + 1) + "/isAvailable";
 
-        // تشفير XOR قبل الإرسال
+        // XOR Encryption
         int encryptedVal = protect(isAvailable ? 1 : 0);
 
         if (Firebase.RTDB.setInt(&fbdo, path.c_str(), encryptedVal)) {
+
           Serial.print("Slot ");
           Serial.print(i + 1);
           Serial.println(isAvailable ? " FREE" : " OCCUPIED");
+
         } else {
+
           Serial.print("Firebase Error: ");
           Serial.println(fbdo.errorReason());
         }
 
         lastSlotState[i] = currentState;
-        delay(120); // خفيف
+
+        delay(120);
       }
     }
   }
 
-  // ================= Gate Logic (LOCAL فقط) =================
+  // ================= Gate Logic =================
   bool gateInState  = digitalRead(IR_GATE_IN);
   bool gateOutState = digitalRead(IR_GATE_OUT);
 
   if (lastGateInState == HIGH && gateInState == LOW && freeSlots > 0) {
+
     ledcWrite(SERVO_IN, SERVO_OPEN);
+
     delay(3000);
+
     ledcWrite(SERVO_IN, SERVO_CLOSE);
   }
 
   if (lastGateOutState == HIGH && gateOutState == LOW) {
+
     ledcWrite(SERVO_OUT, SERVO_OPEN);
+
     delay(3000);
+
     ledcWrite(SERVO_OUT, SERVO_CLOSE);
   }
 
